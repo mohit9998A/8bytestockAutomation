@@ -1,0 +1,62 @@
+version: "3.9"
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: stock_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./initdb:/docker-entrypoint-initdb.d
+
+  dagster-webserver:
+    image: dagster/dagster:1.8.8
+    container_name: dagster_webserver
+    restart: unless-stopped
+    depends_on:
+      - dagster-daemon
+      - dagster-code
+      - postgres
+    environment:
+      DAGSTER_CURRENT_IMAGE: "dagster-code:latest"
+    volumes:
+      - ./dagster_project/dagster.yaml:/opt/dagster/dagster_home/dagster.yaml
+      - ./dagster_project/workspace.yaml:/opt/dagster/app/workspace.yaml
+    command: ["dagster-webserver", "-h", "0.0.0.0", "-p", "3000", "-w", "/opt/dagster/app/workspace.yaml"]
+    ports:
+      - "3000:3000"
+
+  dagster-daemon:
+    image: dagster/dagster:1.8.8
+    container_name: dagster_daemon
+    restart: unless-stopped
+    depends_on:
+      - dagster-code
+      - postgres
+    volumes:
+      - ./dagster_project/dagster.yaml:/opt/dagster/dagster_home/dagster.yaml
+    command: ["dagster-daemon", "run"]
+
+  dagster-code:
+    build:
+      context: ./dagster_project
+      dockerfile: Dockerfile
+    image: dagster-code:latest
+    container_name: dagster_code
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      DAGSTER_HOME: /opt/dagster/dagster_home
+    volumes:
+      - ./dagster_project:/opt/dagster/app
+    depends_on:
+      - postgres
+
+volumes:
+  pgdata:

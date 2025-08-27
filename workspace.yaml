@@ -1,0 +1,4 @@
+load_from:
+  - python_file:
+      relative_path: src/stock_pipeline/repository.py
+      location_name: ${DAGSTER_DEFAULT_LOCATION_NAME}

@@ -1,0 +1,10 @@
+storage:
+  filesystem:
+    base_dir: /opt/dagster/dagster_home/storage
+
+run_coordinator:
+  queued:
+    max_concurrent_runs: 1
+
+telemetry:
+  enabled: false

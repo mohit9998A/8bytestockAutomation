@@ -1,0 +1,24 @@
+[project]
+name = "stock-pipeline"
+version = "0.1.0"
+description = "Dockerized Dagster pipeline to ingest stock data into Postgres"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "dagster==1.8.8",
+    "dagster-webserver==1.8.8",
+    "requests>=2.32.0",
+    "psycopg2-binary>=2.9.9",
+    "SQLAlchemy>=2.0.30",
+    "python-dotenv>=1.0.1",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+"stock_pipeline" = ["*.yaml"]
+
+[build-system]
+requires = ["setuptools>=67", "wheel"]
+build-backend = "setuptools.build_meta"
